@@ -1,113 +1,190 @@
 # StreamVault
 
-A cinematic Netflix-style streaming app built with React, Vite, Express, Supabase, and the TMDB API.
+A full-stack Netflix-style streaming platform with cinematic browsing, hover previews, Supabase authentication, watchlists, profiles, search, watch history, and a custom video player experience.
 
-Live demo: https://streamvault-xi.vercel.app
+[Live Demo](https://streamvault-xi.vercel.app)
 
+## Overview
+
+StreamVault is a polished streaming interface built as a complete full-stack web app. It combines a React/Vite frontend with an Express API, Supabase Auth and Postgres, and live catalog data from TMDB.
+
+The app includes the core flows users expect from a modern streaming service: signing in, browsing rich media rows, opening title details, playing trailers, saving titles, searching the catalog, managing a profile, and tracking watch progress.
+
+## Highlights
+
+- Netflix-inspired home, movie, TV, search, watchlist, and profile screens
+- Large cinematic title cards with hover expansion and trailer previews
+- Supabase email/password authentication with persisted sessions
+- Protected routes for authenticated browsing and profile features
+- TMDB-powered trending, popular, top-rated, search, detail, cast, trailer, and recommendation data
+- Watchlist and watch-history persistence with Supabase Row Level Security
+- Custom video player route using React Player
+- Detail modal with trailers, metadata, cast, ratings, and recommendations
+- Vercel-ready deployment with a serverless Express API entrypoint
+- Responsive Tailwind UI for desktop, tablet, and mobile
+
+## Live App
+
+Production URL:
+
+```txt
+https://streamvault-xi.vercel.app
 ```
-streamvault/
-├── client/      # React + Vite frontend
-├── server/      # Express API
-└── supabase/    # SQL schema + RLS policies
-```
 
-## Tech stack
+## Tech Stack
 
-- **Frontend** — React 18 (Vite), React Router v6, Zustand, TanStack Query v5, Tailwind CSS, Framer Motion, React Player, Lucide icons
-- **Backend** — Node.js + Express, Supabase JS (server-side admin + per-user clients), axios for TMDB
-- **Data** — Supabase Postgres (auth, profiles, watchlist, watch_history, ratings) + TMDB API
-- **Auth** — Supabase Auth (email + password), JWT bearer token verified by server middleware
-
-## Features
-
-| Page | What it does |
+| Layer | Tools |
 | --- | --- |
-| `/` | Public landing — hero video, feature cards, FAQ, email capture |
-| `/login` & `/signup` | Supabase auth with persisted session |
-| `/browse` | Hero banner + Netflix-style horizontal rows with oversized hover-preview cards |
-| `/movies` & `/tv` | Filtered Movies / TV listings |
-| `/search?q=` | Debounced multi-search with media-type filters |
-| `/my-list` | Saved watchlist with empty state |
-| `/profile` | Avatar picker, plan selector, watch history with progress bars |
-| `/watch/:type/:id` | Custom React Player UI with auto-saved progress |
-| Detail modal | Auto-playing trailer, cast, ratings, recommendations, add-to-list |
+| Frontend | React 18, Vite, React Router, Tailwind CSS, Framer Motion |
+| State/Data | Zustand, TanStack Query, Axios |
+| Media | React Player, TMDB image/video metadata |
+| Backend | Node.js, Express, Helmet, CORS, Morgan |
+| Database/Auth | Supabase Auth, Supabase Postgres, Row Level Security |
+| Deployment | Vercel, serverless Express function |
 
-## Prerequisites
+## Project Structure
 
-- **Node.js** 20+ and npm 10+
-- A **Supabase** project (free tier is fine) → grab the URL, anon key, and service role key
-- A **TMDB API key** (free) → https://www.themoviedb.org/settings/api
+```txt
+streamvault/
+├── api/
+│   └── index.js              # Vercel serverless entrypoint for Express
+├── client/
+│   ├── public/
+│   └── src/
+│       ├── api/              # Axios and Supabase clients
+│       ├── components/       # Cards, rows, layout, player, UI primitives
+│       ├── hooks/            # Query and auth hooks
+│       ├── pages/            # Route-level screens
+│       ├── store/            # Zustand stores
+│       └── utils/            # Constants and formatters
+├── server/
+│   ├── index.js
+│   └── src/
+│       ├── controllers/
+│       ├── middleware/
+│       ├── routes/
+│       └── services/
+├── supabase/
+│   └── schema.sql            # Tables, triggers, and RLS policies
+├── vercel.json
+└── package.json
+```
 
-## 1. Install
+## Core Routes
+
+| Route | Description |
+| --- | --- |
+| `/` | Landing page with hero, features, FAQ, and signup entry |
+| `/login` | Supabase login |
+| `/signup` | Supabase signup |
+| `/browse` | Main streaming dashboard with hero and horizontal content rows |
+| `/movies` | Movie-focused catalog view |
+| `/tv` | TV-focused catalog view |
+| `/search` | Debounced search with media-type filters |
+| `/my-list` | Saved titles |
+| `/profile` | Avatar, plan, account, and watch history |
+| `/watch/:type/:id` | Trailer playback and progress tracking |
+
+## Getting Started
+
+### Prerequisites
+
+- Node.js 20+
+- npm 10+
+- Supabase project
+- TMDB API key
+
+### Install Dependencies
 
 ```bash
 npm run install:all
 ```
 
-This installs root, client, and server dependencies.
+This installs dependencies for the root workspace, frontend, and backend.
 
-## 2. Set up Supabase
+### Supabase Setup
 
-1. Create a project at supabase.com.
-2. Open the SQL editor and run [`supabase/schema.sql`](supabase/schema.sql).
-   It creates the four tables (`profiles`, `watchlist`, `watch_history`, `ratings`),
-   enables RLS with per-user policies, and installs the trigger that auto-creates
-   a `profiles` row whenever a new user signs up.
-3. In Authentication → Providers, make sure Email is enabled.
+1. Create a Supabase project.
+2. Open the Supabase SQL editor.
+3. Run the schema in [`supabase/schema.sql`](supabase/schema.sql).
+4. Confirm that Email authentication is enabled in Authentication settings.
 
-## 3. Configure environment variables
+The schema creates:
 
-Create local environment files and fill in real values:
+- `profiles`
+- `watchlist`
+- `watch_history`
+- `ratings`
+- Row Level Security policies
+- A trigger that creates a profile row when a user signs up
+
+### Environment Variables
+
+Create local env files. These files are ignored by Git.
 
 `client/.env`
 
-```
-VITE_SUPABASE_URL=https://<your-project>.supabase.co
-VITE_SUPABASE_ANON_KEY=<anon key>
+```env
+VITE_SUPABASE_URL=https://your-project.supabase.co
+VITE_SUPABASE_ANON_KEY=your-anon-key
 VITE_API_BASE_URL=http://localhost:5000
 ```
 
 `server/.env`
 
-```
+```env
 PORT=5000
-SUPABASE_URL=https://<your-project>.supabase.co
-SUPABASE_SERVICE_ROLE_KEY=<service role key>
-TMDB_API_KEY=<tmdb v3 api key>
+SUPABASE_URL=https://your-project.supabase.co
+SUPABASE_SERVICE_ROLE_KEY=your-service-role-key
+TMDB_API_KEY=your-tmdb-api-key
 TMDB_BASE_URL=https://api.themoviedb.org/3
 CLIENT_URL=http://localhost:5173
 ```
 
-> Never commit `.env` files. They're gitignored.
+Do not commit real `.env` files.
 
-## 4. Run
+## Run Locally
+
+Start the frontend and backend together:
 
 ```bash
 npm run dev
 ```
 
-This boots both processes concurrently:
+Local URLs:
 
-- Client → http://localhost:5173
-- Server → http://localhost:5000 (health check at `/health`)
+```txt
+Client: http://localhost:5173
+Server: http://localhost:5000
+Health: http://localhost:5000/health
+```
 
-Run them individually with `npm run dev:client` or `npm run dev:server`.
+Run either side independently:
 
-## 5. Build
+```bash
+npm run dev:client
+npm run dev:server
+```
+
+## Build
 
 ```bash
 npm run build
 ```
 
-Produces a production bundle for the client in `client/dist/`.
+The production frontend build is created in:
 
-## Deploy on Vercel
-
-The project includes `vercel.json` and a serverless Express entrypoint at `api/index.js`.
-
-Set these environment variables in Vercel for Production and Preview:
-
+```txt
+client/dist
 ```
+
+## Deploy
+
+This repository is ready for Vercel deployment. The included [`vercel.json`](vercel.json) builds the Vite app and routes `/api/*` requests to the Express serverless entrypoint in [`api/index.js`](api/index.js).
+
+Set these variables in Vercel for Production and Preview:
+
+```txt
 VITE_SUPABASE_URL
 VITE_SUPABASE_ANON_KEY
 SUPABASE_URL
@@ -116,55 +193,62 @@ TMDB_API_KEY
 CLIENT_URL=https://streamvault-xi.vercel.app
 ```
 
-Then deploy:
+Deploy:
 
 ```bash
 vercel deploy --prod
 ```
 
-## API surface
+Important: Vite reads `VITE_*` variables at build time. If those values change in Vercel, redeploy the project so the browser bundle receives the new values.
 
-All routes under `/api/*`. Auth-protected routes require `Authorization: Bearer <supabase access token>`.
+## API Reference
 
-| Method | Path | Auth | Description |
+All API routes are served under `/api`.
+
+| Method | Endpoint | Auth | Description |
 | --- | --- | --- | --- |
-| POST | `/api/auth/signup` | – | Create account, return session |
-| POST | `/api/auth/login` | – | Sign in with email/password |
-| POST | `/api/auth/logout` | ✓ | Sign out |
-| GET | `/api/auth/me` | ✓ | Current user |
-| GET | `/api/movies/trending` | – | TMDB trending (week) |
-| GET | `/api/movies/popular` | – | Popular movies |
-| GET | `/api/movies/top-rated` | – | Top rated movies |
-| GET | `/api/movies/genres` | – | Movie genre list |
-| GET | `/api/movies/:id` | – | Movie detail (videos, credits, recs) |
-| GET | `/api/tv/popular` | – | Popular TV |
-| GET | `/api/tv/top-rated` | – | Top rated TV |
-| GET | `/api/tv/:id` | – | TV detail |
-| GET | `/api/search?q=` | – | TMDB multi-search |
-| GET | `/api/watchlist` | ✓ | Get user's watchlist |
-| POST | `/api/watchlist` | ✓ | Add/upsert item |
-| DELETE | `/api/watchlist/:tmdb_id?media_type=` | ✓ | Remove item |
-| GET | `/api/history` | ✓ | Watch history |
-| POST | `/api/history` | ✓ | Upsert progress |
-| GET | `/api/profiles/me` | ✓ | Get profile (auto-creates if missing) |
-| PATCH | `/api/profiles/me` | ✓ | Update username / avatar / plan |
+| `POST` | `/api/auth/signup` | No | Create an account and return a session |
+| `POST` | `/api/auth/login` | No | Sign in with email and password |
+| `POST` | `/api/auth/logout` | Yes | Sign out |
+| `GET` | `/api/auth/me` | Yes | Get the current user |
+| `GET` | `/api/movies/trending` | No | Weekly trending titles |
+| `GET` | `/api/movies/popular` | No | Popular movies |
+| `GET` | `/api/movies/top-rated` | No | Top-rated movies |
+| `GET` | `/api/movies/genres` | No | Movie genres |
+| `GET` | `/api/movies/:id` | No | Movie details, videos, credits, recommendations |
+| `GET` | `/api/tv/popular` | No | Popular TV shows |
+| `GET` | `/api/tv/top-rated` | No | Top-rated TV shows |
+| `GET` | `/api/tv/:id` | No | TV details, videos, credits, recommendations |
+| `GET` | `/api/search?q=` | No | TMDB multi-search |
+| `GET` | `/api/watchlist` | Yes | Get saved titles |
+| `POST` | `/api/watchlist` | Yes | Add or update a saved title |
+| `DELETE` | `/api/watchlist/:tmdb_id?media_type=` | Yes | Remove a saved title |
+| `GET` | `/api/history` | Yes | Get watch history |
+| `POST` | `/api/history` | Yes | Save playback progress |
+| `GET` | `/api/profiles/me` | Yes | Get or create the current profile |
+| `PATCH` | `/api/profiles/me` | Yes | Update profile details |
 
-## Project conventions
+Protected endpoints require:
 
-- **State** — server state lives in TanStack Query, auth in Zustand (persisted to localStorage), UI ephemera (open detail modal, etc.) in a small Zustand store.
-- **Auth flow** — Supabase Auth handles signup/login on the client and persists a session. The server verifies the bearer token via `supabase.auth.getUser(token)` in `requireAuth` middleware, then constructs a per-user Supabase client so all RLS policies fire correctly.
-- **Trailer playback** — TMDB returns YouTube `key`s; React Player streams them. Watch progress is debounced (saves every ≥15s of progress) and persisted to `watch_history`.
-- **Styling** — Tailwind v3 with a custom Netflix-inspired palette (`background`, `surface`, `card`, `primary`). Display font is Bebas Neue, body is DM Sans, both via Google Fonts.
-- **Responsiveness** — Card grids collapse 6→5→3→2 columns; navbar swaps to a hamburger menu on mobile.
+```txt
+Authorization: Bearer <supabase-access-token>
+```
 
-## Things to extend
+## Design Notes
 
-- Real video playback (the project plays YouTube trailers as a stand-in)
-- Per-profile sub-accounts (Netflix-style "who's watching")
-- Server-side rendering / streaming with Next.js
-- Realtime presence with Supabase channels
-- Stripe / billing integration for paid plans
+- The browse rows use oversized landscape cards for a streaming-service feel.
+- Cards expand on hover and reveal playback, watchlist, metadata, and info controls.
+- Trailer previews are loaded lazily from title detail data.
+- The UI keeps a dark cinematic palette with red action accents.
+- The layout is responsive and keeps horizontal rails usable across screen sizes.
+
+## Security Notes
+
+- Local `.env` files are ignored.
+- Vercel environment values are not committed.
+- Supabase service-role access is used only on the server.
+- User-specific data is protected with Supabase Row Level Security.
 
 ## License
 
-MIT — demo / portfolio use.
+MIT
